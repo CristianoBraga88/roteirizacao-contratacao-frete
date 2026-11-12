@@ -1,0 +1,17 @@
+# dados reais NUNCA vão pro GitHub
+*.xls
+*.xlsx
+*.xlsm
+*.csv
+!cidades_coordenadas.csv
+!exemplos/**
+*.pdf
+*.eml
+*.log
+*_estado.json
+*_vistos.json
+.env
+.env.enc
+__pycache__/
+venv/
+.venv/

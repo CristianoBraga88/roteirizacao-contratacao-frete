@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<!-- sem cache: garante que o F5 sempre busque a versão mais nova do arquivo -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Relatório de Roteirização</title>
+<style>
+  :root{
+    --bg:#0e1b10; --card:#152416; --border:#2a3f2c; --border-strong:#3d5a3f;
+    --text:#e9f3e6; --text-2:#a7c2a3; --text-muted:#7c9a7b;
+    --red-800:#ffb3ab; --red-600:#ff8a7a; --gray-50:#1b2e1c;
+    --amber:#d9b34a; --blue:#5fb894;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text); margin:0; padding:24px;}
+  .wrap{max-width:none; width:calc(100vw - 40px); margin:0 auto;}
+  .logo-header{display:flex; justify-content:center; margin-bottom:20px;}
+  .logo-header img{max-width:220px; max-height:96px; width:auto; height:auto;}
+  h1{font-size:20px; font-weight:500; margin:0; color:var(--text);}
+  .sub{font-size:13px; color:var(--text-2); margin:4px 0 0;}
+  .topbar{margin-bottom:20px;}
+  .fonte-base{display:inline-block; margin-top:8px; font-size:12px; padding:4px 10px; border-radius:6px;
+    background:var(--gray-50); border:0.5px solid var(--border-strong); color:var(--text-2);}
+  .fonte-base strong{color:var(--text); font-weight:500;}
+  .fonte-base.antiga{border-color:var(--amber); color:var(--amber);}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px;}
+  .card{background:var(--card); border:0.5px solid var(--border); border-radius:10px; padding:14px 16px;}
+  .card .lbl{font-size:12px; color:var(--text-2); margin:0;}
+  .card .val{font-size:22px; font-weight:500; margin:4px 0 0; color:var(--text);}
+  .section{margin-bottom:22px;}
+  .section-head{display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
+  .section-head .title{font-weight:500; font-size:15px; margin:0; color:var(--text);}
+  .section-head .note{font-size:12px; color:var(--text-muted);}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{text-align:left; padding:8px 12px; font-weight:500; color:var(--text-2); background:var(--gray-50); border-bottom:0.5px solid var(--border);}
+  tbody td{padding:8px 12px; border-top:0.5px solid var(--border); vertical-align:middle; color:var(--text);}
+  td.num{text-align:right;}
+  .tbl-card{background:var(--card); border:0.5px solid var(--border); border-radius:12px; overflow:hidden; overflow-x:auto; margin-bottom:14px;}
+  .subhead{font-size:13px; font-weight:500; margin:0; padding:12px 14px 4px; color:var(--text);}
+  footer{font-size:12px; color:var(--text-muted); margin-top:24px; text-align:center;}
+
+  .btn-acao{background:var(--blue); color:#0e1b10; border:none; border-radius:8px; padding:8px 14px;
+    font-size:13px; font-weight:500; cursor:pointer;}
+  .btn-acao:hover{opacity:0.9;}
+  .topo-dados{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;}
+  .btn-grande{font-size:15px !important; padding:11px 20px !important; font-weight:700;}
+  .abas{display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 16px; border-bottom:1px solid var(--border);}
+  .aba{background:transparent; color:var(--text-2); border:1px solid transparent; border-bottom:none; border-radius:10px 10px 0 0;
+    padding:10px 16px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:-1px;}
+  .aba.ativa{background:var(--card); color:var(--blue); border-color:var(--border);}
+  .dados-box{margin-bottom:14px;} .dados-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; flex-wrap:wrap;}
+  #dadosCargasBody .btn-acao{padding:4px 10px; font-size:12px;} #dadosCargasBody td.num, #dadosCargasBody td:nth-child(4){white-space:nowrap;}
+  .msg-copiado{font-size:12px; color:var(--blue); margin-left:8px; display:none;}
+
+  .badge-cs{display:inline-block; font-size:11px; padding:2px 8px; border-radius:6px; font-weight:500;
+    background:rgba(255,138,122,0.15); color:var(--red-600); margin-left:6px;}
+  .destaque-nf{color:var(--red-600); font-weight:600;}
+  .btn-info{background:none; border:1px solid var(--border-strong); color:var(--text-2); border-radius:50%;
+    width:22px; height:22px; font-size:12px; cursor:pointer; line-height:1;}
+  .btn-info:hover{border-color:var(--blue); color:var(--blue);}
+  .linha-info td{background:var(--gray-50); font-size:12px; color:var(--text-2); padding:10px 14px;}
+  .linha-info dl{margin:0; display:grid; grid-template-columns:140px 1fr; gap:4px 10px;}
+  .linha-info dt{color:var(--text-muted);}
+  .linha-info dd{margin:0; color:var(--text);}
+  .hide{display:none;}
+  .prazo-atrasado{color:var(--red-600); font-weight:600;}
+  .prazo-hoje{color:var(--amber); font-weight:600;}
+  .prazo-perto{color:var(--amber);}
+  .prazo-ok{color:var(--text-2);}
+  .cap-box{margin:6px 0 10px; font-size:12px; color:var(--text-2); line-height:2;}
+  .cap-chip{display:inline-block; padding:1px 8px; border-radius:10px; border:1px solid rgba(127,127,127,.35); margin-right:4px; white-space:nowrap;}
+  .cap-chip.cap-est{background:rgba(255,138,122,.18); border-color:var(--red-600); color:var(--red-600); font-weight:600;}
+  .cap-alerta{color:var(--red-600); font-weight:600; margin-top:2px;}
+  .badge-cap{font-size:10px; padding:0 6px; border-radius:8px; background:rgba(255,138,122,.2); color:var(--red-600); white-space:nowrap;}
+  .prazo-na{color:var(--text-muted);}
+  td.prazo b{font-weight:600;}
+  #lotacaoBody td{white-space:nowrap; padding:6px 8px; font-size:12.5px;}
+  #lotacaoBody td.cliente{max-width:260px; overflow:hidden; text-overflow:ellipsis;}
+  #lotacaoBody td.nros{white-space:normal; font-size:11.5px; color:var(--text-2); max-width:200px;}
+  #lotacaoBody td.situacao{font-size:12px;}
+  #lotacaoBody td.botoes .btn-acao{padding:5px 10px; font-size:12px; margin-right:4px;}
+  table thead th{white-space:nowrap; padding:8px 8px; font-size:12px;}
+  tr.linha-prazo-atrasado td{background:rgba(255,138,122,0.07);}
+  .filtro-uf{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 10px;}
+  .filtro-lbl{font-size:12px; color:var(--text-2);}
+  .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{background:var(--card); border:0.5px solid var(--border-strong); color:var(--text-2); border-radius:14px;
+    padding:4px 10px; font-size:12px; cursor:pointer;}
+  .chip:hover{border-color:var(--blue); color:var(--text);}
+  .chip.ativo{background:var(--blue); color:#0e1b10; border-color:var(--blue); font-weight:600;}
+  .chip .qtd{opacity:0.7; margin-left:4px;}
+  .chip.tem-urgente{border-color:var(--red-600);}
+  .filtro-resumo{font-size:12px; color:var(--text-muted);}
+  .marc-info{font-size:12px; color:var(--text-2); margin-left:auto; display:flex; align-items:center; gap:8px;}
+  #lotacaoBody tr, #agendadoNfBody tr{cursor:pointer;}
+  #lotacaoBody tr:hover td, #agendadoNfBody tr:hover td{background:rgba(127,178,229,0.08);}
+  tr.marcada td, #lotacaoBody tr.marcada td, #agendadoNfBody tr.marcada td{background:#7a1f17 !important; color:#ffffff !important;}
+  tr.marcada td *{color:#ffffff !important;}
+  tr.marcada .btn-acao{background:#ffffff; color:#7a1f17 !important;}
+  tr.linha-prazo-hoje td{background:rgba(217,179,74,0.07);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-header">
+    
+  </div>
+  <div class="topbar">
+    <h1>Relatório de Roteirização</h1>
+    <p class="sub">Universo: O.C. PAI vazio, Ordem de carga vazia &middot; gerado em 12/11/2026 13:46:39</p>
+    <span class="fonte-base">Base lida: <strong>Base Roteirizacao (exemplo).xlsx</strong> &middot; salva em 12/11/2026 13:46 &middot; 40 linhas</span>
+    <div class="topo-dados">
+      <button type="button" class="btn-acao btn-grande" onclick="copiarTodasTexto()">📋 Copiar dados de TODAS as cargas</button>
+      <span class="sub" id="msgTodas">cliente, destino, agendamento da entrega, data da coleta, veículo, paletes, peso, valor e senha de cada carga, de uma vez só</span>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><p class="lbl">Total no universo (Lotação + Fracionado)</p><p class="val">R$ 2.408.961,44</p><p class="sub">345.681 kg</p></div>
+    <div class="card"><p class="lbl">Lotação</p><p class="val" id="lotacaoValor"></p><p class="sub" id="lotacaoPeso"></p></div>
+  </div>
+
+  <div class="abas">
+    <button type="button" class="aba ativa" id="abaBtnRot" onclick="mostrarAba('rot')">Roteirização</button>
+    <button type="button" class="aba" id="abaBtnDados" onclick="mostrarAba('dados')">Dados das cargas (paletes, peso, valor, cidade, agenda)</button>
+  </div>
+
+  <div class="section" id="secDados" style="display:none;">
+    <div class="section-head"><p class="title">Dados das cargas &mdash; os mesmos veículos da aba Roteirização</p>
+      <span class="note">uma linha por carga · respeita o filtro de estado da aba Roteirização</span></div>
+    <div class="tbl-card dados-box">
+      <div class="dados-head"><b id="dadosResumo"></b>
+        <span><span class="msg-copiado" id="msgCopiado2">Copiado!</span>
+        <button type="button" class="btn-acao" onclick="copiarDadosTodas()">Copiar cargas (cola no Excel)</button></span></div>
+      <table><thead><tr><th>#</th><th>Veículo</th><th>Cliente</th><th>Cidade/UF</th><th>Agenda da entrega</th><th>Coletar até</th><th class="num">Paletes</th>
+        <th class="num">Peso</th><th class="num">Valor da nota</th><th class="num">Pedidos</th><th>Entrega</th><th>Obs.</th><th></th></tr></thead>
+        <tbody id="dadosCargasBody"></tbody></table>
+    </div>
+    <div class="section-head" style="margin-top:18px;"><p class="title">Pedidos (um por linha)</p>
+      <span class="note">todos os pedidos do universo da base, com a carga em que cada um entrou</span>
+      <button type="button" class="btn-acao" onclick="copiarPedidos()">Copiar pedidos (cola no Excel)</button></div>
+    <div class="tbl-card">
+      <table><thead><tr><th>Nro. Único</th><th>Carga</th><th>Cliente</th><th>Cidade/UF</th><th>Agenda da entrega</th><th>Coletar até</th><th class="num">Paletes</th>
+        <th class="num">Peso</th><th class="num">Valor da nota</th><th>Entrega</th><th>Obs.</th></tr></thead>
+        <tbody id="pedidosBody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="title">Lotação &mdash; veículos formados (mais urgente primeiro)</p>
+      <span class="note">TRUCK até 13t &middot; CARRETA até 23t &middot; RODOTREM &ge;27t &middot; Regra do CD (Gerente): <b>Liberar até</b> (D-0) &rarr; <b>Carregar até</b> (D+1, preparação e carregamento) &rarr; <b>Coletar até</b> (D+2, início do trânsito a 500 km/dia). Vale para Uberaba e Maceió &middot; km estimado x 1,25 ou do distancias_uberaba.ini &middot; capacidade: Uberaba 23 O.C.s/dia, Maceió 6</span>
+    </div>
+    <div id="capacidadeBox" class="cap-box"></div>
+    <div class="filtro-uf">
+      <span class="filtro-lbl">Filtrar por estado:</span>
+      <div id="chipsUf" class="chips"></div>
+      <span id="resumoFiltro" class="filtro-resumo"></span>
+      <span class="marc-info"><span id="qtdMarcadas">0</span> linha(s) marcada(s) &middot; clique na linha para marcar/desmarcar
+        <button type="button" class="chip" onclick="limparMarcadas()">Limpar marcações</button></span>
+    </div>
+    <span class="msg-copiado" id="msgCopiado" style="margin-bottom:8px; display:none;">Copiado!</span>
+    <div class="tbl-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Liberar até</th><th>Carregar até</th><th>Coletar até</th><th>Agenda</th><th>Situação</th>
+            <th>Veículo</th><th>Origem</th><th>Cliente</th><th>Cidade/UF</th><th>Entrega</th>
+            <th class="num">Km · dias</th><th class="num">Peso</th><th class="num">Valor</th><th class="num">Lin.</th>
+            <th>Números únicos</th><th>Títulos</th>
+          </tr>
+        </thead>
+        <tbody id="lotacaoBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="title">Agendado com NF SEM data de agenda &mdash; separado da Lotação</p>
+      <span class="note">ainda falta agendar (título *AGENDAR*). Os "Agendado com NF" que JÁ têm data estão lá em cima, como carga agendada normal, com Contratação</span>
+    </div>
+    <div class="tbl-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo</th><th>Origem</th><th>Cliente</th><th>Cidade/UF</th>
+            <th>Peso</th><th>Valor</th><th>Linhas somadas</th><th>Números únicos</th><th>Título Roteirização</th>
+          </tr>
+        </thead>
+        <tbody id="agendadoNfBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="title">Fracionado por operador</p>
+      <span class="note">replica os filtros que o time já usa no Sankhya pra puxar a lista de cada operador &middot; Empresa 209 (Maceió) é sempre Xi</span>
+    </div>
+    <div class="tbl-card">
+      <table>
+        <thead><tr><th></th><th>Operador</th><th>Qtde. pedidos (únicos)</th><th>Qtde. linhas</th><th>Valor</th><th>Peso</th><th>UFs</th></tr></thead>
+        <tbody id="fracionadoBody"></tbody>
+      </table>
+    </div>
+    <p class="sub">Um pedido pode aparecer em mais de um operador quando os critérios se sobrepõem (ex: SP entre Nu/Theta/Iota) — é intencional, pra mostrar todas as opções possíveis.</p>
+  </div>
+
+  <footer>Gerado em 12/11/2026 13:46:39 a partir de Base Roteirizacao (exemplo).xlsx. Se este horário não for o de agora, você está olhando um relatório antigo — rode o script de novo (ele abre o arquivo certo sozinho).</footer>
+</div>
+
+<script>
+const lotacao = {"capacidade": [], "qtd_veiculos": 25, "valor": "R$ 2.250.058,76", "peso": "323.706 kg", "veiculos": [{"tipo_veiculo": "CARRETA", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 03 LTDA", "origem": "Uberaba", "valor": "R$ 184.486,76", "peso": "21.227 kg", "pallets": 30.3, "qtd_linhas": 1, "numeros_unicos": "5000038", "titulo_contratacao": "JOINVILLE - SC - 21.227 kg - CARRETA *AGENDADO 18/11/2026 08:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 03 LTDA *AGENDADO 18/11/2026 08:00*", "agenda": "18/11 08:00", "agenda_completa": "18/11/2026 08:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 184486.76, "_peso_num": 21227.0, "uf": "JO", "n_carga": 1, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "TERESINA - PI", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 08 LTDA", "origem": "Uberaba", "valor": "R$ 167.184,82", "peso": "20.122 kg", "pallets": 28.7, "qtd_linhas": 1, "numeros_unicos": "5000031", "titulo_contratacao": "TERESINA - PI - 20.122 kg - CARRETA *AGENDADO 22/11/2026 10:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 08 LTDA *AGENDADO 22/11/2026 10:00*", "agenda": "22/11 10:00", "agenda_completa": "22/11/2026 10:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 167184.82, "_peso_num": 20122.0, "uf": "TE", "n_carga": 2, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "LONDRINA - PR", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 10 LTDA", "origem": "Uberaba", "valor": "R$ 121.616,55", "peso": "17.914 kg", "pallets": 25.6, "qtd_linhas": 1, "numeros_unicos": "5000021", "titulo_contratacao": "LONDRINA - PR - 17.914 kg - CARRETA *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 10 LTDA *ORDEM DE CHEGADA*", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 121616.55, "_peso_num": 17914.0, "uf": "LO", "n_carga": 3, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "FEIRA DE SANTANA - BA", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 05 LTDA", "origem": "Uberaba", "valor": "R$ 120.686,70", "peso": "16.983 kg", "pallets": 24.3, "qtd_linhas": 1, "numeros_unicos": "5000028", "titulo_contratacao": "FEIRA DE SANTANA - BA - 16.983 kg - CARRETA *AGENDADO 15/11/2026 06:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 05 LTDA *AGENDADO 15/11/2026 06:00*", "agenda": "15/11 06:00", "agenda_completa": "15/11/2026 06:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 120686.7, "_peso_num": 16983.0, "uf": "FE", "n_carga": 4, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "CONTAGEM - MG", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 03 LTDA", "origem": "Uberaba", "valor": "R$ 116.128,65", "peso": "16.134 kg", "pallets": 23.0, "qtd_linhas": 1, "numeros_unicos": "5000002", "titulo_contratacao": "CONTAGEM - MG - 16.134 kg - CARRETA *AGENDADO 22/11/2026 10:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 03 LTDA *AGENDADO 22/11/2026 10:00*", "agenda": "22/11 10:00", "agenda_completa": "22/11/2026 10:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 116128.65, "_peso_num": 16134.0, "uf": "CO", "n_carga": 5, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 02 LTDA", "origem": "Uberaba", "valor": "R$ 94.396,73", "peso": "16.282 kg", "pallets": 23.3, "qtd_linhas": 1, "numeros_unicos": "5000037", "titulo_contratacao": "JOINVILLE - SC - 16.282 kg - CARRETA *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 02 LTDA *ORDEM DE CHEGADA*", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 94396.73, "_peso_num": 16282.0, "uf": "JO", "n_carga": 6, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "LONDRINA - PR", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 07 LTDA", "origem": "Uberaba", "valor": "R$ 91.525,50", "peso": "10.386 kg", "pallets": 14.8, "qtd_linhas": 1, "numeros_unicos": "5000006", "titulo_contratacao": "LONDRINA - PR - 10.386 kg - TRUCK *AGENDADO 20/11/2026 08:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 07 LTDA *AGENDADO 20/11/2026 08:00*", "agenda": "20/11 08:00", "agenda_completa": "20/11/2026 08:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 91525.5, "_peso_num": 10386.0, "uf": "LO", "n_carga": 7, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 01 LTDA", "origem": "Uberaba", "valor": "R$ 91.476,46", "peso": "14.320 kg", "pallets": 20.5, "qtd_linhas": 1, "numeros_unicos": "5000000", "titulo_contratacao": "JOINVILLE - SC - 14.320 kg - CARRETA *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 01 LTDA *ORDEM DE CHEGADA*", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 91476.46, "_peso_num": 14320.0, "uf": "JO", "n_carga": 8, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "ANAPOLIS - GO", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 02 LTDA", "origem": "Uberaba", "valor": "R$ 89.612,79", "peso": "10.924 kg", "pallets": 15.6, "qtd_linhas": 1, "numeros_unicos": "5000025", "titulo_contratacao": "ANAPOLIS - GO - 10.924 kg - TRUCK *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 02 LTDA *ORDEM DE CHEGADA*", "agenda": "20/11 06:00", "agenda_completa": "20/11/2026 06:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 89612.79, "_peso_num": 10924.0, "uf": "AN", "n_carga": 9, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "TERESINA - PI", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 07 LTDA", "origem": "Uberaba", "valor": "R$ 87.908,19", "peso": "11.650 kg", "pallets": 16.6, "qtd_linhas": 1, "numeros_unicos": "5000018", "titulo_contratacao": "TERESINA - PI - 11.650 kg - TRUCK *AGENDADO 23/11/2026 08:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 07 LTDA *AGENDADO 23/11/2026 08:00*", "agenda": "23/11 08:00", "agenda_completa": "23/11/2026 08:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 87908.19, "_peso_num": 11650.0, "uf": "TE", "n_carga": 10, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "CAMPINAS - SP", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 04 LTDA", "origem": "Uberaba", "valor": "R$ 87.255,31", "peso": "15.624 kg", "pallets": 22.3, "qtd_linhas": 1, "numeros_unicos": "5000027", "titulo_contratacao": "CAMPINAS - SP - 15.624 kg - CARRETA *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 04 LTDA *ORDEM DE CHEGADA*", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 87255.31, "_peso_num": 15624.0, "uf": "CA", "n_carga": 11, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "TERESINA - PI", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 10 LTDA", "origem": "Uberaba", "valor": "R$ 86.369,58", "peso": "15.757 kg", "pallets": 22.5, "qtd_linhas": 1, "numeros_unicos": "5000033", "titulo_contratacao": "TERESINA - PI - 15.757 kg - CARRETA *AGENDADO *", "titulo_roteirizacao": "CLIENTE FICTICIO 10 LTDA *AGENDADO *", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 86369.58, "_peso_num": 15757.0, "uf": "TE", "n_carga": 12, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "CONTAGEM - MG", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 09 LTDA", "origem": "Uberaba", "valor": "R$ 83.307,57", "peso": "14.457 kg", "pallets": 20.7, "qtd_linhas": 1, "numeros_unicos": "5000008", "titulo_contratacao": "CONTAGEM - MG - 14.457 kg - CARRETA *AGENDADO 21/11/2026 06:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 09 LTDA *AGENDADO 21/11/2026 06:00*", "agenda": "21/11 06:00", "agenda_completa": "21/11/2026 06:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 83307.57, "_peso_num": 14457.0, "uf": "CO", "n_carga": 13, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "TERESINA - PI", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 04 LTDA", "origem": "Uberaba", "valor": "R$ 80.818,24", "peso": "11.362 kg", "pallets": 16.2, "qtd_linhas": 1, "numeros_unicos": "5000015", "titulo_contratacao": "TERESINA - PI - 11.362 kg - TRUCK *AGENDADO *", "titulo_roteirizacao": "CLIENTE FICTICIO 04 LTDA *AGENDADO *", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 80818.24, "_peso_num": 11362.0, "uf": "TE", "n_carga": 14, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "LONDRINA - PR", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 01 LTDA", "origem": "Uberaba", "valor": "R$ 77.191,78", "peso": "9.601 kg", "pallets": 13.7, "qtd_linhas": 1, "numeros_unicos": "5000036", "titulo_contratacao": "LONDRINA - PR - 9.601 kg - TRUCK *AGENDADO 23/11/2026 06:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 01 LTDA *AGENDADO 23/11/2026 06:00*", "agenda": "23/11 06:00", "agenda_completa": "23/11/2026 06:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 77191.78, "_peso_num": 9601.0, "uf": "LO", "n_carga": 15, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "LONDRINA - PR", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 03 LTDA", "origem": "Uberaba", "valor": "R$ 77.018,63", "peso": "9.674 kg", "pallets": 13.8, "qtd_linhas": 1, "numeros_unicos": "5000014", "titulo_contratacao": "LONDRINA - PR - 9.674 kg - TRUCK *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 03 LTDA *ORDEM DE CHEGADA*", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 77018.63, "_peso_num": 9674.0, "uf": "LO", "n_carga": 16, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 04 LTDA", "origem": "Uberaba", "valor": "R$ 76.784,74", "peso": "9.992 kg", "pallets": 14.3, "qtd_linhas": 1, "numeros_unicos": "5000039", "titulo_contratacao": "JOINVILLE - SC - 9.992 kg - TRUCK *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 04 LTDA *ORDEM DE CHEGADA*", "agenda": "20/11 06:00", "agenda_completa": "20/11/2026 06:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 76784.74, "_peso_num": 9992.0, "uf": "JO", "n_carga": 17, "dia_lotado": false}, {"tipo_veiculo": "CARRETA", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 10 LTDA", "origem": "Uberaba", "valor": "R$ 73.412,57", "peso": "13.571 kg", "pallets": 19.4, "qtd_linhas": 1, "numeros_unicos": "5000009", "titulo_contratacao": "JOINVILLE - SC - 13.571 kg - CARRETA *AGENDADO *", "titulo_roteirizacao": "CLIENTE FICTICIO 10 LTDA *AGENDADO *", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 73412.57, "_peso_num": 13571.0, "uf": "JO", "n_carga": 18, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "TERESINA - PI", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 06 LTDA", "origem": "Uberaba", "valor": "R$ 72.715,76", "peso": "10.478 kg", "pallets": 15.0, "qtd_linhas": 1, "numeros_unicos": "5000005", "titulo_contratacao": "TERESINA - PI - 10.478 kg - TRUCK *AGENDADO 18/11/2026 06:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 06 LTDA *AGENDADO 18/11/2026 06:00*", "agenda": "18/11 06:00", "agenda_completa": "18/11/2026 06:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 72715.76, "_peso_num": 10478.0, "uf": "TE", "n_carga": 19, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "ANAPOLIS - GO", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 07 LTDA", "origem": "Uberaba", "valor": "R$ 69.346,26", "peso": "11.486 kg", "pallets": 16.4, "qtd_linhas": 1, "numeros_unicos": "5000030", "titulo_contratacao": "ANAPOLIS - GO - 11.486 kg - TRUCK *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 07 LTDA *ORDEM DE CHEGADA*", "agenda": "18/11 08:00", "agenda_completa": "18/11/2026 08:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 69346.26, "_peso_num": 11486.0, "uf": "AN", "n_carga": 20, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Ordem de Chegada", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 09 LTDA", "origem": "Uberaba", "valor": "R$ 69.151,71", "peso": "8.474 kg", "pallets": 12.1, "qtd_linhas": 1, "numeros_unicos": "5000020", "titulo_contratacao": "JOINVILLE - SC - 8.474 kg - TRUCK *ORDEM DE CHEGADA*", "titulo_roteirizacao": "CLIENTE FICTICIO 09 LTDA *ORDEM DE CHEGADA*", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 69151.71, "_peso_num": 8474.0, "uf": "JO", "n_carga": 21, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "TERESINA - PI", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 09 LTDA", "origem": "Uberaba", "valor": "R$ 67.328,64", "peso": "8.306 kg", "pallets": 11.9, "qtd_linhas": 1, "numeros_unicos": "5000032", "titulo_contratacao": "TERESINA - PI - 8.306 kg - TRUCK *AGENDADO *", "titulo_roteirizacao": "CLIENTE FICTICIO 09 LTDA *AGENDADO *", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 67328.64, "_peso_num": 8306.0, "uf": "TE", "n_carga": 22, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "FEIRA DE SANTANA - BA", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 11 LTDA", "origem": "Uberaba", "valor": "R$ 56.272,61", "peso": "9.673 kg", "pallets": 13.8, "qtd_linhas": 1, "numeros_unicos": "5000022", "titulo_contratacao": "FEIRA DE SANTANA - BA - 9.673 kg - TRUCK *AGENDADO 18/11/2026 08:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 11 LTDA *AGENDADO 18/11/2026 08:00*", "agenda": "18/11 08:00", "agenda_completa": "18/11/2026 08:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 56272.61, "_peso_num": 9673.0, "uf": "FE", "n_carga": 23, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "FEIRA DE SANTANA - BA", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 02 LTDA", "origem": "Uberaba", "valor": "R$ 54.721,19", "peso": "9.918 kg", "pallets": 14.2, "qtd_linhas": 1, "numeros_unicos": "5000001", "titulo_contratacao": "FEIRA DE SANTANA - BA - 9.918 kg - TRUCK *AGENDADO 18/11/2026 08:00*", "titulo_roteirizacao": "CLIENTE FICTICIO 02 LTDA *AGENDADO 18/11/2026 08:00*", "agenda": "18/11 08:00", "agenda_completa": "18/11/2026 08:00", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "? (cidade sem UF)", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "ponha o km em distancias_uberaba.ini", "classe_prazo": "prazo-na", "_valor_num": 54721.19, "_peso_num": 9918.0, "uf": "FE", "n_carga": 24, "dia_lotado": false}, {"tipo_veiculo": "TRUCK", "cidade_uf": "JOINVILLE - SC", "tipo_entrega": "Agendado", "destaque_nf": false, "precisa_customer_service": false, "nome": "CLIENTE FICTICIO 03 LTDA", "origem": "Uberaba", "valor": "R$ 53.341,02", "peso": "9.391 kg", "pallets": 13.4, "qtd_linhas": 1, "numeros_unicos": "5000026", "titulo_contratacao": "JOINVILLE - SC - 9.391 kg - TRUCK *AGENDADO *", "titulo_roteirizacao": "CLIENTE FICTICIO 03 LTDA *AGENDADO *", "agenda": "", "agenda_completa": "sem agenda", "observacao": "", "km": "", "km_fonte": "", "dias_viagem": "", "saida_uberaba": "sem agenda", "expedicao_ate": "", "liberar_ate": "", "saida_ordem": "9999-99-99", "exped_ordem": "", "liberar_ordem": "", "status_prazo": "", "classe_prazo": "prazo-na", "_valor_num": 53341.02, "_peso_num": 9391.0, "uf": "JO", "n_carga": 25, "dia_lotado": false}], "veiculos_agendado_nf": [], "titulos_contratacao": ["JOINVILLE - SC - 21.227 kg - CARRETA *AGENDADO 18/11/2026 08:00*", "TERESINA - PI - 20.122 kg - CARRETA *AGENDADO 22/11/2026 10:00*", "LONDRINA - PR - 17.914 kg - CARRETA *ORDEM DE CHEGADA*", "FEIRA DE SANTANA - BA - 16.983 kg - CARRETA *AGENDADO 15/11/2026 06:00*", "CONTAGEM - MG - 16.134 kg - CARRETA *AGENDADO 22/11/2026 10:00*", "JOINVILLE - SC - 16.282 kg - CARRETA *ORDEM DE CHEGADA*", "LONDRINA - PR - 10.386 kg - TRUCK *AGENDADO 20/11/2026 08:00*", "JOINVILLE - SC - 14.320 kg - CARRETA *ORDEM DE CHEGADA*", "ANAPOLIS - GO - 10.924 kg - TRUCK *ORDEM DE CHEGADA*", "TERESINA - PI - 11.650 kg - TRUCK *AGENDADO 23/11/2026 08:00*", "CAMPINAS - SP - 15.624 kg - CARRETA *ORDEM DE CHEGADA*", "TERESINA - PI - 15.757 kg - CARRETA *AGENDADO *", "CONTAGEM - MG - 14.457 kg - CARRETA *AGENDADO 21/11/2026 06:00*", "TERESINA - PI - 11.362 kg - TRUCK *AGENDADO *", "LONDRINA - PR - 9.601 kg - TRUCK *AGENDADO 23/11/2026 06:00*", "LONDRINA - PR - 9.674 kg - TRUCK *ORDEM DE CHEGADA*", "JOINVILLE - SC - 9.992 kg - TRUCK *ORDEM DE CHEGADA*", "JOINVILLE - SC - 13.571 kg - CARRETA *AGENDADO *", "TERESINA - PI - 10.478 kg - TRUCK *AGENDADO 18/11/2026 06:00*", "ANAPOLIS - GO - 11.486 kg - TRUCK *ORDEM DE CHEGADA*", "JOINVILLE - SC - 8.474 kg - TRUCK *ORDEM DE CHEGADA*", "TERESINA - PI - 8.306 kg - TRUCK *AGENDADO *", "FEIRA DE SANTANA - BA - 9.673 kg - TRUCK *AGENDADO 18/11/2026 08:00*", "FEIRA DE SANTANA - BA - 9.918 kg - TRUCK *AGENDADO 18/11/2026 08:00*", "JOINVILLE - SC - 9.391 kg - TRUCK *AGENDADO *"], "titulos_roteirizacao": ["CLIENTE FICTICIO 03 LTDA *AGENDADO 18/11/2026 08:00*", "CLIENTE FICTICIO 08 LTDA *AGENDADO 22/11/2026 10:00*", "CLIENTE FICTICIO 10 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 05 LTDA *AGENDADO 15/11/2026 06:00*", "CLIENTE FICTICIO 03 LTDA *AGENDADO 22/11/2026 10:00*", "CLIENTE FICTICIO 02 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 07 LTDA *AGENDADO 20/11/2026 08:00*", "CLIENTE FICTICIO 01 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 02 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 07 LTDA *AGENDADO 23/11/2026 08:00*", "CLIENTE FICTICIO 04 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 10 LTDA *AGENDADO *", "CLIENTE FICTICIO 09 LTDA *AGENDADO 21/11/2026 06:00*", "CLIENTE FICTICIO 04 LTDA *AGENDADO *", "CLIENTE FICTICIO 01 LTDA *AGENDADO 23/11/2026 06:00*", "CLIENTE FICTICIO 03 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 04 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 10 LTDA *AGENDADO *", "CLIENTE FICTICIO 06 LTDA *AGENDADO 18/11/2026 06:00*", "CLIENTE FICTICIO 07 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 09 LTDA *ORDEM DE CHEGADA*", "CLIENTE FICTICIO 09 LTDA *AGENDADO *", "CLIENTE FICTICIO 11 LTDA *AGENDADO 18/11/2026 08:00*", "CLIENTE FICTICIO 02 LTDA *AGENDADO 18/11/2026 08:00*", "CLIENTE FICTICIO 03 LTDA *AGENDADO *"]};
+const pedidosBase = [{"nro": "5000038", "carga": "1 · CARRETA", "_n": 1, "coleta": "—", "cliente": "CLIENTE FICTICIO 03 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "18/11/2026 08:00", "paletes": 30.3, "peso": 21227.0, "valor": 184486.76, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000031", "carga": "2 · CARRETA", "_n": 2, "coleta": "—", "cliente": "CLIENTE FICTICIO 08 LTDA", "cidade_uf": "TERESINA - PI", "uf": "TE", "agenda": "22/11/2026 10:00", "paletes": 28.7, "peso": 20122.0, "valor": 167184.82, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000021", "carga": "3 · CARRETA", "_n": 3, "coleta": "—", "cliente": "CLIENTE FICTICIO 10 LTDA", "cidade_uf": "LONDRINA - PR", "uf": "LO", "agenda": "sem agenda", "paletes": 25.6, "peso": 17914.0, "valor": 121616.55, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000028", "carga": "4 · CARRETA", "_n": 4, "coleta": "—", "cliente": "CLIENTE FICTICIO 05 LTDA", "cidade_uf": "FEIRA DE SANTANA - BA", "uf": "FE", "agenda": "15/11/2026 06:00", "paletes": 24.3, "peso": 16983.0, "valor": 120686.7, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000002", "carga": "5 · CARRETA", "_n": 5, "coleta": "—", "cliente": "CLIENTE FICTICIO 03 LTDA", "cidade_uf": "CONTAGEM - MG", "uf": "CO", "agenda": "22/11/2026 10:00", "paletes": 23.0, "peso": 16134.0, "valor": 116128.65, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000037", "carga": "6 · CARRETA", "_n": 6, "coleta": "—", "cliente": "CLIENTE FICTICIO 02 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 23.3, "peso": 16282.0, "valor": 94396.73, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000006", "carga": "7 · TRUCK", "_n": 7, "coleta": "—", "cliente": "CLIENTE FICTICIO 07 LTDA", "cidade_uf": "LONDRINA - PR", "uf": "LO", "agenda": "20/11/2026 08:00", "paletes": 14.8, "peso": 10386.0, "valor": 91525.5, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000000", "carga": "8 · CARRETA", "_n": 8, "coleta": "—", "cliente": "CLIENTE FICTICIO 01 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 20.5, "peso": 14320.0, "valor": 91476.46, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000025", "carga": "9 · TRUCK", "_n": 9, "coleta": "—", "cliente": "CLIENTE FICTICIO 02 LTDA", "cidade_uf": "ANAPOLIS - GO", "uf": "AN", "agenda": "20/11/2026 06:00", "paletes": 15.6, "peso": 10924.0, "valor": 89612.79, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000018", "carga": "10 · TRUCK", "_n": 10, "coleta": "—", "cliente": "CLIENTE FICTICIO 07 LTDA", "cidade_uf": "TERESINA - PI", "uf": "TE", "agenda": "23/11/2026 08:00", "paletes": 16.6, "peso": 11650.0, "valor": 87908.19, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000027", "carga": "11 · CARRETA", "_n": 11, "coleta": "—", "cliente": "CLIENTE FICTICIO 04 LTDA", "cidade_uf": "CAMPINAS - SP", "uf": "CA", "agenda": "sem agenda", "paletes": 22.3, "peso": 15624.0, "valor": 87255.31, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000033", "carga": "12 · CARRETA", "_n": 12, "coleta": "—", "cliente": "CLIENTE FICTICIO 10 LTDA", "cidade_uf": "TERESINA - PI", "uf": "TE", "agenda": "sem agenda", "paletes": 22.5, "peso": 15757.0, "valor": 86369.58, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000008", "carga": "13 · CARRETA", "_n": 13, "coleta": "—", "cliente": "CLIENTE FICTICIO 09 LTDA", "cidade_uf": "CONTAGEM - MG", "uf": "CO", "agenda": "21/11/2026 06:00", "paletes": 20.7, "peso": 14457.0, "valor": 83307.57, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000015", "carga": "14 · TRUCK", "_n": 14, "coleta": "—", "cliente": "CLIENTE FICTICIO 04 LTDA", "cidade_uf": "TERESINA - PI", "uf": "TE", "agenda": "sem agenda", "paletes": 16.2, "peso": 11362.0, "valor": 80818.24, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000036", "carga": "15 · TRUCK", "_n": 15, "coleta": "—", "cliente": "CLIENTE FICTICIO 01 LTDA", "cidade_uf": "LONDRINA - PR", "uf": "LO", "agenda": "23/11/2026 06:00", "paletes": 13.7, "peso": 9601.0, "valor": 77191.78, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000014", "carga": "16 · TRUCK", "_n": 16, "coleta": "—", "cliente": "CLIENTE FICTICIO 03 LTDA", "cidade_uf": "LONDRINA - PR", "uf": "LO", "agenda": "sem agenda", "paletes": 13.8, "peso": 9674.0, "valor": 77018.63, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000039", "carga": "17 · TRUCK", "_n": 17, "coleta": "—", "cliente": "CLIENTE FICTICIO 04 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "20/11/2026 06:00", "paletes": 14.3, "peso": 9992.0, "valor": 76784.74, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000009", "carga": "18 · CARRETA", "_n": 18, "coleta": "—", "cliente": "CLIENTE FICTICIO 10 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 19.4, "peso": 13571.0, "valor": 73412.57, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000005", "carga": "19 · TRUCK", "_n": 19, "coleta": "—", "cliente": "CLIENTE FICTICIO 06 LTDA", "cidade_uf": "TERESINA - PI", "uf": "TE", "agenda": "18/11/2026 06:00", "paletes": 15.0, "peso": 10478.0, "valor": 72715.76, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000030", "carga": "20 · TRUCK", "_n": 20, "coleta": "—", "cliente": "CLIENTE FICTICIO 07 LTDA", "cidade_uf": "ANAPOLIS - GO", "uf": "AN", "agenda": "18/11/2026 08:00", "paletes": 16.4, "peso": 11486.0, "valor": 69346.26, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000020", "carga": "21 · TRUCK", "_n": 21, "coleta": "—", "cliente": "CLIENTE FICTICIO 09 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 12.1, "peso": 8474.0, "valor": 69151.71, "tipo_entrega": "Ordem de Chegada", "observacao": ""}, {"nro": "5000032", "carga": "22 · TRUCK", "_n": 22, "coleta": "—", "cliente": "CLIENTE FICTICIO 09 LTDA", "cidade_uf": "TERESINA - PI", "uf": "TE", "agenda": "sem agenda", "paletes": 11.9, "peso": 8306.0, "valor": 67328.64, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000022", "carga": "23 · TRUCK", "_n": 23, "coleta": "—", "cliente": "CLIENTE FICTICIO 11 LTDA", "cidade_uf": "FEIRA DE SANTANA - BA", "uf": "FE", "agenda": "18/11/2026 08:00", "paletes": 13.8, "peso": 9673.0, "valor": 56272.61, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000001", "carga": "24 · TRUCK", "_n": 24, "coleta": "—", "cliente": "CLIENTE FICTICIO 02 LTDA", "cidade_uf": "FEIRA DE SANTANA - BA", "uf": "FE", "agenda": "18/11/2026 08:00", "paletes": 14.2, "peso": 9918.0, "valor": 54721.19, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000026", "carga": "25 · TRUCK", "_n": 25, "coleta": "—", "cliente": "CLIENTE FICTICIO 03 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 13.4, "peso": 9391.0, "valor": 53341.02, "tipo_entrega": "Agendado", "observacao": ""}, {"nro": "5000012", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 01 LTDA", "cidade_uf": "FEIRA DE SANTANA - BA", "uf": "FE", "agenda": "sem agenda", "paletes": 2.9, "peso": 2022.0, "valor": 11103.55, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000024", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 01 LTDA", "cidade_uf": "NITEROI - RJ", "uf": "NI", "agenda": "sem agenda", "paletes": 0.8, "peso": 571.0, "valor": 4932.93, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000013", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 02 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 2.8, "peso": 1988.0, "valor": 13760.1, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000003", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 04 LTDA", "cidade_uf": "CONTAGEM - MG", "uf": "CO", "agenda": "sem agenda", "paletes": 1.7, "peso": 1220.0, "valor": 9547.22, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000004", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 05 LTDA", "cidade_uf": "FEIRA DE SANTANA - BA", "uf": "FE", "agenda": "sem agenda", "paletes": 2.3, "peso": 1638.0, "valor": 14465.05, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000016", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 05 LTDA", "cidade_uf": "CAMPINAS - SP", "uf": "CA", "agenda": "sem agenda", "paletes": 1.9, "peso": 1300.0, "valor": 11588.21, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000017", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 06 LTDA", "cidade_uf": "NITEROI - RJ", "uf": "NI", "agenda": "sem agenda", "paletes": 1.6, "peso": 1149.0, "valor": 8127.55, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000029", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 06 LTDA", "cidade_uf": "CONTAGEM - MG", "uf": "CO", "agenda": "sem agenda", "paletes": 1.3, "peso": 877.0, "valor": 7283.15, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000007", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 08 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 4.1, "peso": 2867.0, "valor": 23485.01, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000019", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 08 LTDA", "cidade_uf": "ANAPOLIS - GO", "uf": "AN", "agenda": "sem agenda", "paletes": 1.4, "peso": 1008.0, "valor": 5846.07, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000010", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 11 LTDA", "cidade_uf": "NITEROI - RJ", "uf": "NI", "agenda": "sem agenda", "paletes": 3.7, "peso": 2593.0, "valor": 13229.5, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000034", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 11 LTDA", "cidade_uf": "FEIRA DE SANTANA - BA", "uf": "FE", "agenda": "sem agenda", "paletes": 3.2, "peso": 2253.0, "valor": 16270.64, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000011", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 12 LTDA", "cidade_uf": "ANAPOLIS - GO", "uf": "AN", "agenda": "sem agenda", "paletes": 1.0, "peso": 688.0, "valor": 5185.9, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000023", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 12 LTDA", "cidade_uf": "JOINVILLE - SC", "uf": "JO", "agenda": "sem agenda", "paletes": 2.1, "peso": 1489.0, "valor": 12207.68, "tipo_entrega": "Normal", "observacao": ""}, {"nro": "5000035", "carga": "Fracionado", "_n": 9999, "coleta": "—", "cliente": "CLIENTE FICTICIO 12 LTDA", "cidade_uf": "NITEROI - RJ", "uf": "NI", "agenda": "sem agenda", "paletes": 0.4, "peso": 312.0, "valor": 1870.12, "tipo_entrega": "Normal", "observacao": ""}];
+const fracionadoPorOperador = [{"operador": "Xi", "qtd_pedidos": 0, "qtd_linhas": 0, "valor": "R$ 0,00", "peso": "0 kg", "ufs": "—", "info": {"coleta": "Coleta no CD e Entrega no cliente", "criacao_carga": "1 O.C. pai e 1 O.C. Filho para cada região (ex: PA 1 Filho, RN 1 Filho...)", "peso": "Sem restrições, porém recomendado peso de truck", "data_coleta": "Realiza coleta diária Seg a Sex, só precisa do envio do romaneio"}}, {"operador": "Nu", "qtd_pedidos": 1, "qtd_linhas": 1, "valor": "R$ 11.588,21", "peso": "1.300 kg", "ufs": "SP", "info": {"coleta": "Não coleta no CD — necessário contratar para entregar", "criacao_carga": "1 O.C. pai e 1 O.C. Filho pra tudo que estiver no filtro", "peso": "Acima de 17 toneladas - CARRETA", "data_coleta": "Combinar com transportador de LOTAÇÃO"}}, {"operador": "Theta", "qtd_pedidos": 4, "qtd_linhas": 4, "valor": "R$ 28.160,10", "peso": "4.625 kg", "ufs": "RJ", "info": {"coleta": "Coleta no CD e Entrega no cliente", "criacao_carga": "1 O.C. pai e 1 O.C. Filho pra tudo que estiver no filtro", "peso": "Sem restrição", "data_coleta": "Realiza coleta diária Seg a Sex, só precisa do envio do romaneio"}}, {"operador": "Kappa", "qtd_pedidos": 3, "qtd_linhas": 3, "valor": "R$ 41.839,24", "peso": "5.913 kg", "ufs": "BA", "info": {"coleta": "Coleta no CD e Entrega no cliente", "criacao_carga": "1 O.C. pai e 1 O.C. Filho para cada região (ex: PA 1 Filho, RN 1 Filho...)", "peso": "Acima de 17 toneladas - CARRETA", "data_coleta": "Realiza coleta diária Seg a Sex, só precisa do envio do romaneio"}}, {"operador": "Epsilon", "qtd_pedidos": 2, "qtd_linhas": 2, "valor": "R$ 11.031,97", "peso": "1.696 kg", "ufs": "GO", "info": {"coleta": "Coleta no CD e Entrega no cliente", "criacao_carga": "1 O.C. pai e 1 O.C. Filho para cada região (ex: PA 1 Filho, RN 1 Filho...)", "peso": "Sem restrição", "data_coleta": "Realiza coleta diária Seg a Sex, só precisa do envio do romaneio"}}, {"operador": "Iota", "qtd_pedidos": 6, "qtd_linhas": 6, "valor": "R$ 77.871,37", "peso": "9.741 kg", "ufs": "MG, SC, SP", "info": {"coleta": "Coleta no CD e Entrega no cliente", "criacao_carga": "1 O.C. Pai e 1 Filho para cada MACRO REGIÃO/REGIÃO (ex: Macro 2 MG = 1 O.C. Pai e 1 Filho; Macro 906 MG = 1 O.C. Pai e 1 Filho; Macro 906 SP = 1 O.C. Pai e 1 Filho)", "peso": "Sem restrição", "data_coleta": "Realiza coleta diária Seg a Sex, só precisa do envio do romaneio"}}];
+
+document.getElementById('lotacaoValor').textContent = lotacao.valor;
+document.getElementById('lotacaoPeso').textContent = lotacao.qtd_veiculos + ' veículo(s) · ' + lotacao.peso;
+
+let ufsSelecionadas = new Set();   // vazio = todos
+try { const salvo = JSON.parse(localStorage.getItem('rotFiltroUf') || '[]'); ufsSelecionadas = new Set(salvo); } catch(e) {}
+function passaFiltro(v){ return ufsSelecionadas.size === 0 || ufsSelecionadas.has(v.uf); }
+function fmtBR(n, dec){ return n.toLocaleString('pt-BR', {minimumFractionDigits: dec, maximumFractionDigits: dec}); }
+
+function montarChips(){
+  const todos = lotacao.veiculos.concat(lotacao.veiculos_agendado_nf);
+  const cont = {}, urg = {};
+  todos.forEach(v => { cont[v.uf] = (cont[v.uf] || 0) + 1; if (v.classe_prazo === 'prazo-atrasado') urg[v.uf] = true; });
+  const ufs = Object.keys(cont).sort();
+  // tira do filtro salvo o estado que não existe mais na base de hoje
+  ufsSelecionadas = new Set([...ufsSelecionadas].filter(u => cont[u]));
+  // tira marcações de cargas que não estão mais na base
+  const chavesHoje = new Set(todos.map(chaveLinha));
+  marcadas = new Set([...marcadas].filter(k => chavesHoje.has(k)));
+  let h = `<button type="button" class="chip ${ufsSelecionadas.size === 0 ? 'ativo' : ''}" onclick="filtrarUf('')">Todos<span class="qtd">${todos.length}</span></button>`;
+  h += ufs.map(u => `<button type="button" class="chip ${ufsSelecionadas.has(u) ? 'ativo' : ''} ${urg[u] ? 'tem-urgente' : ''}"
+      title="${urg[u] ? 'tem carga atrasada / urgente' : ''}" onclick="filtrarUf('${u}', event)">${u}<span class="qtd">${cont[u]}</span></button>`).join('');
+  document.getElementById('chipsUf').innerHTML = h;
+}
+
+function filtrarUf(uf, ev){
+  if (!uf) ufsSelecionadas.clear();
+  else if (ev && (ev.ctrlKey || ev.metaKey)) { ufsSelecionadas.has(uf) ? ufsSelecionadas.delete(uf) : ufsSelecionadas.add(uf); }
+  else if (ufsSelecionadas.size === 1 && ufsSelecionadas.has(uf)) ufsSelecionadas.clear();
+  else { ufsSelecionadas = new Set([uf]); }
+  try { localStorage.setItem('rotFiltroUf', JSON.stringify([...ufsSelecionadas])); } catch(e) {}
+  renderTabelas();
+}
+
+// ---- marcar linhas (fica salvo no navegador, vale mesmo gerando o relatório de novo)
+let marcadas = new Set();
+try { marcadas = new Set(JSON.parse(localStorage.getItem('rotLinhasMarcadas') || '[]')); } catch(e) {}
+function chaveLinha(v){ return (v.numeros_unicos && v.numeros_unicos !== '—') ? v.numeros_unicos : (v.cidade_uf + '|' + v.nome + '|' + v.peso); }
+function estaMarcada(v){ return marcadas.has(chaveLinha(v)); }
+function salvarMarcadas(){
+  try { localStorage.setItem('rotLinhasMarcadas', JSON.stringify([...marcadas])); } catch(e) {}
+  const el = document.getElementById('qtdMarcadas');
+  if (el) el.textContent = document.querySelectorAll('tr.marcada').length;
+}
+function clicarLinha(tr, ev){
+  const k = tr.dataset.chave;
+  const noBotao = ev && ev.target && ev.target.closest('button');
+  if (noBotao) { marcadas.add(k); tr.classList.add('marcada'); }      // copiou o título = marca como feita
+  else if (marcadas.has(k)) { marcadas.delete(k); tr.classList.remove('marcada'); }
+  else { marcadas.add(k); tr.classList.add('marcada'); }
+  salvarMarcadas();
+}
+function limparMarcadas(){
+  marcadas.clear();
+  document.querySelectorAll('tr.marcada').forEach(t => t.classList.remove('marcada'));
+  salvarMarcadas();
+}
+
+function renderTabelas(){
+  montarChips();
+  const vis = lotacao.veiculos.filter(passaFiltro);
+  const peso = vis.reduce((a, v) => a + v._peso_num, 0), valor = vis.reduce((a, v) => a + v._valor_num, 0);
+  document.getElementById('resumoFiltro').textContent = ufsSelecionadas.size === 0 ? 'Ctrl+clique para escolher mais de um estado'
+    : `${vis.length} veículo(s) · ${fmtBR(peso, 0)} kg · R$ ${fmtBR(valor, 2)}  (Ctrl+clique soma estados)`;
+document.getElementById('lotacaoBody').innerHTML = lotacao.veiculos.map((v, i) => !passaFiltro(v) ? '' : `
+  <tr class="linha-${v.classe_prazo} ${estaMarcada(v) ? 'marcada' : ''}" data-chave="${chaveLinha(v)}" onclick="clicarLinha(this, event)">
+    <td class="${v.classe_prazo}"><b>${v.liberar_ate || '—'}</b></td>
+    <td class="${v.classe_prazo}">${v.expedicao_ate || '—'}${v.dia_lotado ? ' <span class="badge-cap" title="Neste dia de carregamento o CD passa do limite de O.C.s">dia lotado</span>' : ''}</td>
+    <td class="${v.classe_prazo}">${v.saida_uberaba}</td>
+    <td>${v.agenda || '—'}</td>
+    <td class="situacao ${v.classe_prazo}">${v.status_prazo || ''}</td>
+    <td>${v.tipo_veiculo}</td>
+    <td>${v.origem}</td>
+    <td class="cliente" title="${v.nome}">${v.nome}</td>
+    <td>${v.cidade_uf}</td>
+    <td>${v.destaque_nf ? `<span class="destaque-nf" title="Agendado com NF, mas já tem agenda: tratado como carga agendada">${v.tipo_entrega}</span>` : v.tipo_entrega}${v.precisa_customer_service ? '<span class="badge-cs">Acionar Customer Service</span>' : ''}</td>
+    <td class="num" title="${v.km_fonte}">${v.km ? v.km + ' km · ' + v.dias_viagem + 'd' : '—'}${v.km_fonte === 'manual' ? ' ✓' : ''}</td>
+    <td class="num">${v.peso}</td>
+    <td class="num">${v.valor}</td>
+    <td class="num">${v.qtd_linhas}</td>
+    <td class="nros">${v.numeros_unicos}</td>
+    <td class="botoes">
+      ${v.titulo_contratacao ? `<button type="button" class="btn-acao" onclick="copiarTituloLinha(${i}, 'contratacao')" title="${v.titulo_contratacao}">Contratação</button>` : ''}
+      ${v.titulo_roteirizacao ? `<button type="button" class="btn-acao" onclick="copiarTituloLinha(${i}, 'roteirizacao')" title="${v.titulo_roteirizacao}">Roteirização</button>` : ''}
+    </td>
+  </tr>`).join('') || '<tr><td colspan="16" class="sub">Nenhum veículo de lotação para este filtro.</td></tr>';
+  renderDadosCargas();
+  const cap = lotacao.capacidade || [];
+  const est = cap.filter(c => c.estourou);
+  document.getElementById('capacidadeBox').innerHTML = !cap.length ? '' :
+    `<b>Carregamentos por dia (todas as lotações agendadas):</b> ` + cap.map(c => `<span class="cap-chip ${c.estourou ? 'cap-est' : ''}">${c.origem} ${c.dia}: ${c.qtd}/${c.limite}</span>`).join(' ')
+    + (est.length ? `<div class="cap-alerta">⚠ Passou da capacidade: ${est.map(c => `${c.origem} ${c.dia} (${c.qtd} O.C.s, limite ${c.limite} — antecipar ${c.qtd - c.limite})`).join(' · ')}</div>` : '');
+
+
+
+document.getElementById('agendadoNfBody').innerHTML = lotacao.veiculos_agendado_nf.map((v, i) => !passaFiltro(v) ? '' : `
+  <tr class="${estaMarcada(v) ? 'marcada' : ''}" data-chave="${chaveLinha(v)}" onclick="clicarLinha(this, event)">
+    <td>${v.tipo_veiculo}</td>
+    <td>${v.origem}</td>
+    <td>${v.nome}</td>
+    <td>${v.cidade_uf}</td>
+    <td class="num">${v.peso}</td>
+    <td class="num">${v.valor}</td>
+    <td class="num">${v.qtd_linhas}</td>
+    <td>${v.numeros_unicos}</td>
+    <td style="white-space:nowrap;">
+      ${v.titulo_roteirizacao ? `<button type="button" class="btn-acao" onclick="copiarTituloLinhaNf(${i})">Roteirização</button>` : ''}
+    </td>
+  </tr>`).join('') || '<tr><td colspan="9" class="sub">Nenhum Agendado com NF (sem data) para este filtro.</td></tr>';
+}
+renderTabelas();
+salvarMarcadas();
+
+document.getElementById('fracionadoBody').innerHTML = fracionadoPorOperador.map((o, i) => `
+  <tr>
+    <td><button type="button" class="btn-info" onclick="toggleInfoOperador(${i})" title="Como funciona ${o.operador}">?</button></td>
+    <td>${o.operador}</td>
+    <td class="num">${o.qtd_pedidos}</td>
+    <td class="num">${o.qtd_linhas}</td>
+    <td class="num">${o.valor}</td>
+    <td class="num">${o.peso}</td>
+    <td>${o.ufs}</td>
+  </tr>
+  <tr class="linha-info hide" id="infoOperador-${i}">
+    <td colspan="7">
+      <dl>
+        <dt>Coleta</dt><dd>${o.info.coleta || '—'}</dd>
+        <dt>Criação de carga</dt><dd>${o.info.criacao_carga || '—'}</dd>
+        <dt>Peso</dt><dd>${o.info.peso || '—'}</dd>
+        <dt>Data de coleta</dt><dd>${o.info.data_coleta || '—'}</dd>
+      </dl>
+    </td>
+  </tr>`).join('') || '<tr><td colspan="7" class="sub">Nada de fracionado disponível agora.</td></tr>';
+
+function toggleInfoOperador(i){
+  document.getElementById('infoOperador-' + i).classList.toggle('hide');
+}
+
+function _copiarTexto(texto, callback){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(callback).catch(() => _copiarFallback(texto, callback));
+  } else {
+    _copiarFallback(texto, callback);
+  }
+}
+
+function _copiarFallback(texto, callback){
+  const area = document.createElement('textarea');
+  area.value = texto;
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(area);
+  if(callback) callback();
+}
+
+function _mostrarCopiado(){
+  const msg = document.getElementById('msgCopiado');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2000);
+}
+
+function copiarTituloLinha(indice, tipo){
+  const v = lotacao.veiculos[indice];
+  if(!v) return;
+  const texto = tipo === 'contratacao' ? _linhaContratacao(v) : v.titulo_roteirizacao;
+  if(!texto) return;
+  _copiarTexto(texto, _mostrarCopiado);
+}
+
+function _linhaContratacao(v){
+  // MG-UBERABA 22 TON CARRETA *AGENDADO* 13/11/2026  (ou *ORDEM DE CHEGADA*)
+  const t = v.titulo_contratacao || '';
+  const cu = (v.cidade_uf || '').split(' - ');
+  const destino = cu.length > 1 ? (cu[0].trim() + '-' + cu.slice(1).join(' - ').trim()).toUpperCase() : (v.cidade_uf || '').toUpperCase();
+  let kg = typeof v._peso_num === 'number' ? v._peso_num : parseFloat(String(v.peso || '').replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+  const peso = kg >= 1000 ? (kg >= 3000 ? Math.round(kg / 1000) + ' TON' : (kg / 1000).toFixed(1).replace('.', ',') + ' TON') : Math.round(kg) + ' KG';
+  const veic = (v.tipo_veiculo || '').toUpperCase();
+  let tipo;
+  if(/CHEGADA/i.test(t) || /CHEGADA/i.test(v.tipo_entrega || '')) tipo = '*ORDEM DE CHEGADA*';
+  else { const m = String(v.agenda_completa || '').match(/\d{2}\/\d{2}\/\d{4}/) || t.match(/\d{2}\/\d{2}\/\d{4}/); tipo = '*AGENDADO*' + (m ? ' ' + m[0] : ''); }
+  const al = (v.origem === 'Maceió' || /^AL X/i.test(t)) ? 'AL X ' : '';
+  return [al + destino, peso, veic, tipo].filter(x => x).join(' ');
+}
+function _textoDados(v){
+  const l = [`Cliente: ${v.nome}`, `Destino: ${v.cidade_uf}`, `Agendamento da entrega: ${v.agenda_completa}`,
+    `Coletar até: ${_coleta(v)}`, `Veículo: ${v.tipo_veiculo}`,
+    `Paletes: ${fmtBR(v.pallets || 0, 2)}`, `Peso: ${v.peso}`, `Valor da nota: ${v.valor}`, `Entrega: ${v.tipo_entrega}`];
+  if(v.observacao) l.push(`Obs.: ${v.observacao}`);
+  if(v.numeros_unicos && v.numeros_unicos !== '—') l.push(`Números únicos: ${v.numeros_unicos}`);
+  return l.join('\n');
+}
+function copiarTodasTexto(){
+  const t = _todasCargas();
+  if(!t.length){ document.getElementById('msgTodas').textContent = 'Nenhuma carga para copiar (confira o filtro de estado).'; return; }
+  const filtro = ufsSelecionadas.size ? ` (estados: ${[...ufsSelecionadas].join(', ')})` : '';
+  const texto = `DADOS DAS CARGAS · ${t.length} carga(s)${filtro}\n\n` + t.map(v => `CARGA ${v.n_carga}\n` + _textoDados(v)).join('\n\n');
+  _copiarTexto(texto, () => {
+    const m = document.getElementById('msgTodas');
+    m.textContent = `✔ Copiado: ${t.length} carga(s). É só colar (Ctrl+V) no e-mail, Teams ou WhatsApp.`;
+    m.style.color = 'var(--blue)';
+  });
+}
+function _coleta(v){ const c = v.saida_uberaba || ''; return (!c || c === 'sem agenda' || c.startsWith('?')) ? 'sem data (sem agenda ou sem km)' : c; }
+function copiarDadosLinha(v){ if(v) _copiarTexto(_textoDados(v), _mostrarCopiado); }
+function _todasCargas(){ return lotacao.veiculos.concat(lotacao.veiculos_agendado_nf).filter(passaFiltro); }
+function renderDadosCargas(){
+  const box = document.getElementById('dadosCargasBody'); if(!box) return;
+  const t = _todasCargas();
+  const pal = t.reduce((a, v) => a + (v.pallets || 0), 0), peso = t.reduce((a, v) => a + v._peso_num, 0), val = t.reduce((a, v) => a + v._valor_num, 0);
+  document.getElementById('dadosResumo').textContent = `${t.length} carga(s) · ${fmtBR(pal, 2)} paletes · ${fmtBR(peso, 0)} kg · R$ ${fmtBR(val, 2)}`;
+  box.innerHTML = t.map((v, i) => `<tr>
+    <td>${v.n_carga || ''}</td><td>${v.tipo_veiculo}</td><td class="cliente" title="${v.nome}">${v.nome}</td><td>${v.cidade_uf}</td><td>${v.agenda_completa}</td><td><b>${_coleta(v)}</b></td>
+    <td class="num">${fmtBR(v.pallets || 0, 2)}</td><td class="num">${v.peso}</td><td class="num">${v.valor}</td><td class="num">${v.qtd_linhas}</td>
+    <td>${v.tipo_entrega}</td><td>${v.observacao || ''}</td>
+    <td><button type="button" class="btn-acao" onclick="copiarDadosLinha(_todasCargas()[${i}])">Copiar</button></td></tr>`).join('')
+    || '<tr><td colspan="13" class="sub">Nenhuma carga para este filtro.</td></tr>';
+  const ped = pedidosBase.filter(p => ufsSelecionadas.size === 0 || ufsSelecionadas.has(p.uf));
+  document.getElementById('pedidosBody').innerHTML = ped.map(p => `<tr>
+    <td>${p.nro}</td><td>${p.carga}</td><td class="cliente" title="${p.cliente}">${p.cliente}</td><td>${p.cidade_uf}</td><td>${p.agenda}</td><td>${p.coleta}</td>
+    <td class="num">${fmtBR(p.paletes, 2)}</td><td class="num">${fmtBR(p.peso, 0)} kg</td><td class="num">R$ ${fmtBR(p.valor, 2)}</td>
+    <td>${p.tipo_entrega}</td><td>${p.observacao}</td></tr>`).join('')
+    || '<tr><td colspan="11" class="sub">Nenhum pedido para este filtro.</td></tr>';
+}
+function mostrarAba(nome){
+  document.querySelectorAll('.section').forEach(sec => { sec.style.display = (nome === 'dados') === (sec.id === 'secDados') ? '' : 'none'; });
+  document.getElementById('abaBtnRot').classList.toggle('ativa', nome !== 'dados');
+  document.getElementById('abaBtnDados').classList.toggle('ativa', nome === 'dados');
+  if(nome === 'dados') renderDadosCargas();
+  try { history.replaceState(null, '', nome === 'dados' ? '#dados' : '#'); } catch(e) {}
+}
+function _copiado2(){ _mostrarCopiado(); const m = document.getElementById('msgCopiado2'); if(m){ m.style.display='inline'; setTimeout(() => m.style.display='none', 2000); } }
+function copiarPedidos(){
+  const cab = ['Nro. Único','Carga','Cliente','Cidade/UF','Agendamento da entrega','Coletar até','Paletes','Peso (kg)','Valor da nota (R$)','Entrega','Obs.'];
+  const lin = pedidosBase.filter(p => ufsSelecionadas.size === 0 || ufsSelecionadas.has(p.uf)).map(p => [p.nro, p.carga, p.cliente, p.cidade_uf, p.agenda, p.coleta,
+    fmtBR(p.paletes, 2), fmtBR(p.peso, 0), fmtBR(p.valor, 2), p.tipo_entrega, p.observacao].join('\t'));
+  _copiarTexto([cab.join('\t')].concat(lin).join('\n'), _copiado2);
+}
+function toggleDadosCargas(){
+  const box = document.getElementById('dadosCargasBox');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  renderDadosCargas();
+}
+function copiarDadosTodas(){
+  const cab = ['Veículo','Cliente','Cidade/UF','Agendamento da entrega','Coletar até','Paletes','Peso (kg)','Valor da nota (R$)','Entrega','Obs.','Números únicos'];
+  const lin = _todasCargas().map(v => [v.tipo_veiculo, v.nome, v.cidade_uf, v.agenda_completa, _coleta(v), fmtBR(v.pallets || 0, 2),
+    fmtBR(v._peso_num, 0), fmtBR(v._valor_num, 2), v.tipo_entrega, v.observacao || '', v.numeros_unicos].join('\t'));
+  _copiarTexto([cab.join('\t')].concat(lin).join('\n'), _copiado2);
+}
+
+if(location.hash === '#dados') setTimeout(() => mostrarAba('dados'), 0);
+
+function copiarTituloLinhaNf(indice){
+  const v = lotacao.veiculos_agendado_nf[indice];
+  if(!v || !v.titulo_roteirizacao) return;
+  _copiarTexto(v.titulo_roteirizacao, _mostrarCopiado);
+}
+</script>
+</body>
+</html>
